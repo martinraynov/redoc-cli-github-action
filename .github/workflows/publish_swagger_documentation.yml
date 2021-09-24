@@ -19,7 +19,6 @@ jobs:
     - name: Install ReDoc-CLI
       run:  npm install -g redoc-cli
     - name: Generate ReDoc html documentation
-      working-directory: docs
       run: redoc-cli bundle --output docs/index.html documentation/swagger.yml
     - name: Commit documentation changes
       run: |
