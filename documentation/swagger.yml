@@ -1,0 +1,3984 @@
+openapi: 3.0.0
+info:
+  version: v1.4
+  title: Documentation of API Chaos
+  x-logo:
+    url: "https://navitia.com/content/uploads/2021/04/logo-navitia-bleu@3x.png"
+    backgroundColor: "#FFFFFF"
+    altText: "The Famous Navitia Logo"
+  description: >
+    Chaos is the web service which can feed
+    [Navitia](https://github.com/CanalTP/navitia) with real-time
+    [disruptions](http://doc.navitia.io/#traffic-reports).
+
+
+    It can work together with [Kirin](https://github.com/CanalTP/kirin) which can feed [Navitia](https://github.com/CanalTP/navitia) with real-time delays.
+
+
+    Chaos manage disruptions and help you to communicate with your travelers on the best.
+
+
+    **Requirements**
+
+
+    Before using Chaos, you will need few things:
+     * a Navitia token, allowing you to request Navitia on a data coverage
+     * a customer ID
+     * a contributor ID
+
+    Your usual Kisio Digital interlocutor can provide you these elements and an access to the production or pre-production platform.
+
+
+    ***customer ID***
+
+
+    A customer (aka 'client') is a string value of your choice that will be set at your first cause, channel, severity or tag creation.
+    When set, all created resources will be related to this client.
+
+
+    ***contributor ID***
+
+
+    A contributor is a string value shared with Navitia to identify who's providing disruptions in your coverage(s). It's named 'rt_topics' in Navitia configuration.
+    You can use several contributors per client and in your coverage(s) for example to differentiate disruptions creators (web UI(s)/automated bot(s)).
+
+
+
+    ***Work with us***
+
+
+    Before using this fabulous API in production, you will need to share with Kisio Digital:
+     * integration specifications
+     * expected load your application will generate.
+
+    These two points are required to manage the Chaos platform.
+
+
+    ---
+
+
+    To properly use following examples the values of hostname and port number should be updated depending on your configuration of the WebService access.
+
+  license:
+    name: AGPL
+    url: http://www.gnu.org/licenses/agpl-3.0.html
+tags:
+  - name: Category
+  - name: Channel
+  - name: Channel type
+  - name: Cause
+  - name: Disruption
+  - name: Impact
+  - name: Property
+  - name: Severity
+  - name: Status
+  - name: Tag
+  - name: Traffic Reports
+  - name: Search
+  - name: Export
+  - name: History
+  - name: Contributor
+paths:
+  /categories:
+    get:
+      description: Retrieve the list of all categories
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_coverage"
+        - $ref: "#/components/parameters/header_customer_id"
+      tags:
+        - Category
+      responses:
+        "200":
+          description: List of categories
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  meta:
+                    type: object
+                  categories:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/category"
+    post:
+      description: Creates a category
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_coverage"
+        - $ref: "#/components/parameters/header_customer_id_create_client"
+      requestBody:
+        $ref: "#/components/requestBodies/category_creation"
+      tags:
+        - Category
+      responses:
+        "201":
+          description: Created category
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  category:
+                    $ref: "#/components/schemas/category"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_occurred"
+  "/categories/{id}":
+    get:
+      description: Retrieve the category identified by ID
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_coverage"
+        - $ref: "#/components/parameters/header_customer_id"
+        - name: id
+          in: path
+          required: true
+          description: Entity identifier
+          schema:
+            type: string
+      tags:
+        - Category
+      responses:
+        "200":
+          description: Category entity
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  category:
+                    $ref: "#/components/schemas/category"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    $ref: "#/components/schemas/bad_id"
+    put:
+      description: Update a category
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_coverage"
+        - $ref: "#/components/parameters/header_customer_id"
+        - name: id
+          in: path
+          required: true
+          description: Entity identifier
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/category_creation"
+      tags:
+        - Category
+      responses:
+        "200":
+          description: Category entity
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  category:
+                    $ref: "#/components/schemas/category"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_occurred"
+    delete:
+      description: remove a category
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_coverage"
+        - $ref: "#/components/parameters/header_customer_id"
+        - name: id
+          in: path
+          required: true
+          description: Entity identifier
+          schema:
+            type: string
+      tags:
+        - Category
+      responses:
+        "204":
+          description: Category has been removed
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    $ref: "#/components/schemas/bad_id"
+  /causes:
+    get:
+      description: Retrieve the list of all causes
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_coverage"
+        - $ref: "#/components/parameters/header_customer_id"
+      tags:
+        - Cause
+      responses:
+        "200":
+          description: List of causes
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  meta:
+                    type: object
+                  causes:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/cause"
+    post:
+      description: Creates a cause
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_coverage"
+        - $ref: "#/components/parameters/header_customer_id_create_client"
+      requestBody:
+        $ref: "#/components/requestBodies/cause_creation"
+      tags:
+        - Cause
+      responses:
+        "201":
+          description: Created cause
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cause:
+                    $ref: "#/components/schemas/cause"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_occurred"
+  "/causes/{id}":
+    get:
+      description: Retrieve the cause identified by ID
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_coverage"
+        - $ref: "#/components/parameters/header_customer_id"
+        - name: id
+          in: path
+          required: true
+          description: Entity identifier
+          schema:
+            type: string
+      tags:
+        - Cause
+      responses:
+        "200":
+          description: Cause entity
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cause:
+                    $ref: "#/components/schemas/cause"
+        "400":
+          description: Wrong ID
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    $ref: "#/components/schemas/bad_id"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_404"
+    put:
+      description: Update a cause
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_coverage"
+        - $ref: "#/components/parameters/header_customer_id"
+        - name: id
+          in: path
+          required: true
+          description: Entity identifier
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/cause_creation"
+      tags:
+        - Cause
+      responses:
+        "200":
+          description: Cause entity
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cause:
+                    $ref: "#/components/schemas/cause"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_occurred"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_404"
+    delete:
+      description: remove a cause
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_coverage"
+        - $ref: "#/components/parameters/header_customer_id"
+        - name: id
+          in: path
+          required: true
+          description: Entity identifier
+          schema:
+            type: string
+      tags:
+        - Cause
+      responses:
+        "204":
+          description: Cause has been removed
+        "400":
+          description: Wrong ID
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    $ref: "#/components/schemas/bad_id"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_404"
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_occurred"
+  /channels:
+    get:
+      description: Retrieves all the channels
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_coverage"
+        - $ref: "#/components/parameters/header_customer_id"
+      tags:
+        - Channel
+      responses:
+        "200":
+          description: List of channels
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  meta:
+                    type: object
+                  channels:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/channel"
+    post:
+      description: Creates a channel
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_coverage"
+        - $ref: "#/components/parameters/header_customer_id_create_client"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/channel_creation"
+        description: Channel that needs to be stored
+      tags:
+        - Channel
+      responses:
+        "201":
+          description: Created channel
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  channel:
+                    $ref: "#/components/schemas/channel"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_occurred"
+  "/channels/{id}":
+    get:
+      description: Retrieve the channel identified by ID
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_coverage"
+        - $ref: "#/components/parameters/header_customer_id"
+        - name: id
+          in: path
+          required: true
+          description: Entity identifier
+          schema:
+            type: string
+      tags:
+        - Channel
+      responses:
+        "200":
+          description: Channel entity
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  channel:
+                    $ref: "#/components/schemas/channel"
+        "400":
+          description: ID is wrong
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_occurred"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_404"
+    put:
+      description: Update a channel
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_coverage"
+        - $ref: "#/components/parameters/header_customer_id"
+        - name: id
+          in: path
+          required: true
+          description: Entity identifier
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/channel_creation"
+        description: Category that needs to be stored
+      tags:
+        - Channel
+      responses:
+        "200":
+          description: Channel entity
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  channel:
+                    $ref: "#/components/schemas/channel"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_occurred"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_404"
+    delete:
+      description: remove a channel
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_coverage"
+        - $ref: "#/components/parameters/header_customer_id"
+        - name: id
+          in: path
+          required: true
+          description: Entity identifier
+          schema:
+            type: string
+      tags:
+        - Channel
+      responses:
+        "204":
+          description: Channel has been removed
+        "400":
+          description: Wrong ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_occurred"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_404"
+  /channel_types:
+    get:
+      description: Retrieve the list of channel types
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_coverage"
+        - $ref: "#/components/parameters/header_customer_id"
+      tags:
+        - Channel type
+      responses:
+        "200":
+          description: List of channel types
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  channel_types:
+                    type: array
+                    items:
+                      type: string
+  /properties:
+    get:
+      description: Retrieve the list of all properties
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_coverage"
+        - $ref: "#/components/parameters/header_customer_id"
+        - $ref: "#/components/parameters/header_contributors"
+      tags:
+        - Property
+      responses:
+        "200":
+          description: List of properties
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  properties:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/property"
+    post:
+      description: Creates a property
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_coverage"
+        - $ref: "#/components/parameters/header_customer_id_create_client"
+        - $ref: "#/components/parameters/header_contributors"
+      requestBody:
+        $ref: "#/components/requestBodies/property_creation"
+      tags:
+        - Property
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  property:
+                    $ref: "#/components/schemas/property"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_occurred"
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_occurred"
+  "/properties/{id}":
+    get:
+      description: Retrieve the property identified by ID
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_coverage"
+        - $ref: "#/components/parameters/header_customer_id"
+        - name: id
+          in: path
+          required: true
+          description: Entity identifier
+          schema:
+            type: string
+      tags:
+        - Property
+      responses:
+        "200":
+          description: Property entity
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  property:
+                    $ref: "#/components/schemas/property"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_occurred"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_occurred"
+    put:
+      description: Update a property
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_coverage"
+        - $ref: "#/components/parameters/header_customer_id"
+        - name: id
+          in: path
+          required: true
+          description: Entity identifier
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/property_creation"
+      tags:
+        - Property
+      responses:
+        "200":
+          description: Property entity
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/property"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_occurred"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_occurred"
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_occurred"
+    delete:
+      description: remove a property
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_coverage"
+        - $ref: "#/components/parameters/header_customer_id"
+        - name: id
+          in: path
+          required: true
+          description: Entity identifier
+          schema:
+            type: string
+      tags:
+        - Property
+      responses:
+        "204":
+          description: Property has been removed
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_occurred"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_occurred"
+  /severities:
+    get:
+      description: Retrieves all the severities ordered by priority
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_coverage"
+        - $ref: "#/components/parameters/header_customer_id"
+      tags:
+        - Severity
+      responses:
+        "200":
+          description: List of severities
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  meta:
+                    type: object
+                  severities:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/severity"
+    post:
+      description: Creates a severity
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_coverage"
+        - $ref: "#/components/parameters/header_customer_id_create_client"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/severity_creation"
+        description: Severity that needs to be stored
+      tags:
+        - Severity
+      responses:
+        "201":
+          description: Created severity
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  severity:
+                    $ref: "#/components/schemas/severity"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_occurred"
+  "/severities/{id}":
+    get:
+      description: Retrieve the severity identified by ID
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_coverage"
+        - $ref: "#/components/parameters/header_customer_id"
+        - name: id
+          in: path
+          required: true
+          description: Entity identifier
+          schema:
+            type: string
+      tags:
+        - Severity
+      responses:
+        "200":
+          description: Severity entity
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  severity:
+                    $ref: "#/components/schemas/severity"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/bad_id"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_occurred"
+    put:
+      description: Update a severity
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_coverage"
+        - $ref: "#/components/parameters/header_customer_id"
+        - name: id
+          in: path
+          required: true
+          description: Entity identifier
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/severity_creation"
+        description: Category that needs to be stored
+      tags:
+        - Severity
+      responses:
+        "200":
+          description: Severity entity
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  severity:
+                    $ref: "#/components/schemas/severity"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/bad_id"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_occurred"
+    delete:
+      description: remove a severity
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_coverage"
+        - $ref: "#/components/parameters/header_customer_id"
+        - name: id
+          in: path
+          required: true
+          description: Entity identifier
+          schema:
+            type: string
+      tags:
+        - Severity
+      responses:
+        "204":
+          description: Severity has been removed
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/bad_id"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_occurred"
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_occurred"
+  /status:
+    get:
+      description: Renders state of application
+      tags:
+        - Status
+      responses:
+        "200":
+          description: Renders information about configuration of different components
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  version:
+                    type: string
+                    description: version of application
+                  db_pool_status:
+                    type: string
+                  db_version:
+                    type: string
+                    description: version of db migration
+                  navitia_url:
+                    type: string
+                    description: URL of navitia Web Service
+                  rabbitmq_info:
+                    type: object
+                    description: Information about configuration of RabbitMQ
+                    properties:
+                      alternates:
+                        type: array
+                        description: Information about usage of RabbitMQ
+                        items:
+                          type: string
+                      connect_timeout:
+                        type: integer
+                      heartbeat:
+                        type: integer
+                      hostname:
+                        type: string
+                      insist:
+                        type: boolean
+                      is_active:
+                        type: boolean
+                      is_connected:
+                        type: boolean
+                      login_method:
+                        type: string
+                      port:
+                        type: integer
+                      ssl:
+                        type: boolean
+                      transport:
+                        type: string
+                      transport_options:
+                        type: object
+                      uri_prefix:
+                        type: string
+                      userid:
+                        type: string
+                      virtual_host:
+                        type: string
+  /tags:
+    get:
+      description: Retrieve the list of all tags
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_coverage"
+        - $ref: "#/components/parameters/header_customer_id"
+      tags:
+        - Tag
+      responses:
+        "200":
+          description: List of tags
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  meta:
+                    type: object
+                  tags:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/tag"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  severity:
+                    $ref: "#/components/schemas/error_occurred"
+    post:
+      description: Creates a tag
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_coverage"
+        - $ref: "#/components/parameters/header_customer_id_create_client"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/tag_creation"
+        description: Tag that needs to be stored
+      tags:
+        - Tag
+      responses:
+        "201":
+          description: Created tag
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tag:
+                    $ref: "#/components/schemas/tag"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tag:
+                    $ref: "#/components/schemas/error_occurred"
+  "/tags/{id}":
+    get:
+      description: Retrieve the tag identified by ID
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_coverage"
+        - $ref: "#/components/parameters/header_customer_id"
+        - name: id
+          in: path
+          required: true
+          description: Entity identifier
+          schema:
+            type: string
+      tags:
+        - Tag
+      responses:
+        "201":
+          description: Tag could be find
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tag:
+                    $ref: "#/components/schemas/tag"
+        "400":
+          description: Wrong ID
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    $ref: "#/components/schemas/bad_id"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_404"
+    put:
+      description: Update a tag
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_coverage"
+        - $ref: "#/components/parameters/header_customer_id"
+        - name: id
+          in: path
+          required: true
+          description: Entity identifier
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/tag_creation"
+        description: Category that needs to be stored
+      tags:
+        - Tag
+      responses:
+        "200":
+          description: Tag entity
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tag:
+                    $ref: "#/components/schemas/tag"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tag:
+                    $ref: "#/components/schemas/error_occurred"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_404"
+    delete:
+      description: remove a tag
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_coverage"
+        - $ref: "#/components/parameters/header_customer_id"
+        - name: id
+          in: path
+          required: true
+          description: Entity identifier
+          schema:
+            type: string
+      tags:
+        - Tag
+      responses:
+        "204":
+          description: Tag has been removed
+        "400":
+          description: BAD REQUEST
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    $ref: "#/components/schemas/bad_id"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_404"
+  /traffic_reports:
+    get:
+      deprecated: true
+      description: Use POST /traffic_reports instead
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_coverage"
+        - $ref: "#/components/parameters/header_customer_id"
+        - $ref: "#/components/parameters/header_contributors"
+      tags:
+        - Traffic Reports
+      responses:
+        "200":
+          description: State of public transport traffic
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  disruptions:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/traffic_report_disruption"
+                  traffic_reports:
+                    $ref: "#/components/schemas/traffic_report"
+    post:
+      description: This service provides the state of public transport traffic with filter
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_coverage"
+        - $ref: "#/components/parameters/header_customer_id"
+        - $ref: "#/components/parameters/header_contributors"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ptObjectFilter:
+                  $ref: "#/components/schemas/pt_object_filter"
+        description: traffic with filter on ptObject possible
+      tags:
+        - Traffic Reports
+      responses:
+        "200":
+          description: State of public transport traffic
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  disruptions:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/traffic_report_disruption"
+                  traffic_reports:
+                    $ref: "#/components/schemas/traffic_report"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_occurred"
+  /disruptions:
+    get:
+      deprecated: true
+      description: Use POST /disruptions/_search instead
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_coverage"
+        - $ref: "#/components/parameters/header_customer_id"
+        - $ref: "#/components/parameters/header_contributors"
+        - $ref: "#/components/parameters/start_page"
+        - $ref: "#/components/parameters/items_per_page"
+        - $ref: "#/components/parameters/publication_status"
+        - $ref: "#/components/parameters/ends_after_date"
+        - $ref: "#/components/parameters/ends_before_date"
+        - $ref: "#/components/parameters/current_time"
+        - $ref: "#/components/parameters/tag"
+        - $ref: "#/components/parameters/uri"
+        - $ref: "#/components/parameters/line_section"
+        - $ref: "#/components/parameters/status"
+        - $ref: "#/components/parameters/depth"
+      tags:
+        - Disruption
+      responses:
+        "200":
+          description: List of disruption
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  disruptions:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/disruption"
+                  meta:
+                    type: object
+                    properties:
+                      pagination:
+                        $ref: "#/components/schemas/pagination"
+    post:
+      description: Create one valid disruption with impacts
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_coverage"
+        - $ref: "#/components/parameters/header_customer_id"
+        - $ref: "#/components/parameters/header_contributors"
+      requestBody:
+        $ref: "#/components/requestBodies/disruption_creation"
+      tags:
+        - Disruption
+      responses:
+        "201":
+          description: Created disruption
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  disruption:
+                    $ref: "#/components/schemas/disruption"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_occurred"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_occurred"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_occurred"
+        "503":
+          description: Error during transferring of disruption to Navitia
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_occurred"
+  "/disruptions/{id}":
+    get:
+      description: Retrieve the disruption identified by ID
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_coverage"
+        - $ref: "#/components/parameters/header_customer_id"
+        - $ref: "#/components/parameters/header_contributors"
+        - $ref: "#/components/parameters/depth"
+        - name: id
+          in: path
+          required: true
+          description: Entity identifier
+          schema:
+            type: string
+      tags:
+        - Disruption
+      responses:
+        "200":
+          description: Disruption could be find
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  disruption:
+                    $ref: "#/components/schemas/disruption"
+        "400":
+          description: Disruption bad id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_occurred"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_404"
+    put:
+      description: Update the disruption identified by ID
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_coverage"
+        - $ref: "#/components/parameters/header_customer_id"
+        - $ref: "#/components/parameters/header_contributors"
+        - name: id
+          in: path
+          required: true
+          description: Entity identifier
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/disruption_update"
+      tags:
+        - Disruption
+      responses:
+        "201":
+          description: Disruption could be find
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  disruption:
+                    $ref: "#/components/schemas/disruption"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_occurred"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_404"
+        "409":
+          description: Conflict (disruption cannot get back to the 'draft' status)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_occurred"
+    delete:
+      description: Change the disruption and its impacts statuses to "archived". Archived
+        elements aren't used by Navitia.
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_coverage"
+        - $ref: "#/components/parameters/header_customer_id"
+        - $ref: "#/components/parameters/header_contributors"
+        - name: id
+          in: path
+          required: true
+          description: Entity identifier
+          schema:
+            type: string
+      tags:
+        - Disruption
+      responses:
+        "204":
+          description: Disruption has been removed
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_occurred"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_404"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_occurred"
+        "503":
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_occurred"
+  "/disruptions/{id}/history":
+    get:
+      description: Get a list of historical states of a disruption
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_coverage"
+        - $ref: "#/components/parameters/header_customer_id"
+        - $ref: "#/components/parameters/header_contributors"
+        - name: id
+          in: path
+          required: true
+          description: Entity identifier
+          schema:
+            type: string
+      tags:
+        - History
+      responses:
+        "200":
+          description: List of disruption histories
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  disruptions:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/disruption_history"
+                  meta:
+                    type: object
+                    properties:
+                      pagination:
+                        $ref: "#/components/schemas/pagination"
+        "400":
+          description: Disruption bad id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_occurred"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_occurred"
+  "/disruptions/{id}/impacts":
+    get:
+      description: Return all impacts of a disruption
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_coverage"
+        - $ref: "#/components/parameters/header_customer_id"
+        - $ref: "#/components/parameters/header_contributors"
+        - name: id
+          in: path
+          required: true
+          description: Entity identifier
+          schema:
+            type: string
+      tags:
+        - Impact
+      responses:
+        "200":
+          description: List of impacts for given disruption
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  impacts:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/impact"
+                  meta:
+                    type: object
+                    properties:
+                      pagination:
+                        $ref: "#/components/schemas/pagination"
+    post:
+      description: Create a new impact on a disruption
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_coverage"
+        - $ref: "#/components/parameters/header_customer_id"
+        - $ref: "#/components/parameters/header_contributors"
+        - name: id
+          in: path
+          required: true
+          description: Entity identifier
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/impact_creation"
+        description: Impact that needs to be stored
+      tags:
+        - Impact
+      responses:
+        "201":
+          description: Created impact
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  impact:
+                    $ref: "#/components/schemas/impact"
+  "/disruptions/{id}/impacts/{impact_id}":
+    get:
+      description: Get an impact by id
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_coverage"
+        - $ref: "#/components/parameters/header_customer_id"
+        - $ref: "#/components/parameters/header_contributors"
+        - name: id
+          in: path
+          required: true
+          description: Entity identifier
+          schema:
+            type: string
+        - in: path
+          name: impact_id
+          description: Impact identifier
+          required: true
+          schema:
+            type: string
+            format: uuid
+      tags:
+        - Impact
+      responses:
+        "200":
+          description: Impact identified by ID and disruption ID
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  impact:
+                    $ref: "#/components/schemas/impact"
+    put:
+      description: Update an impact identified by ID and disruption ID
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_coverage"
+        - $ref: "#/components/parameters/header_customer_id"
+        - $ref: "#/components/parameters/header_contributors"
+        - name: id
+          in: path
+          required: true
+          description: Entity identifier
+          schema:
+            type: string
+        - in: path
+          name: impact_id
+          description: Impact identifier
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/impact_creation"
+        description: Impact data to be updated
+      tags:
+        - Impact
+      responses:
+        "200":
+          description: Impact identified by ID and disruption ID
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  impact:
+                    $ref: "#/components/schemas/impact"
+    delete:
+      description: Remove an impact identified by ID and disruption ID
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_coverage"
+        - $ref: "#/components/parameters/header_customer_id"
+        - $ref: "#/components/parameters/header_contributors"
+        - name: id
+          in: path
+          required: true
+          description: Entity identifier
+          schema:
+            type: string
+        - in: path
+          name: impact_id
+          description: Impact identifier
+          required: true
+          schema:
+            type: string
+            format: uuid
+      tags:
+        - Impact
+      responses:
+        "204":
+          description: Impact has been removed
+  /disruptions/_search:
+    post:
+      description: Return filtered disruptions and impacts
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_coverage"
+        - $ref: "#/components/parameters/header_customer_id"
+        - $ref: "#/components/parameters/header_contributors"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/disruptions_search"
+        description: Parameters of filter
+      tags:
+        - Search
+      responses:
+        "200":
+          description: List of disruption
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  disruptions:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/disruption"
+                  meta:
+                    type: object
+                    properties:
+                      pagination:
+                        $ref: "#/components/schemas/pagination"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_occurred"
+  /impacts/_search:
+    post:
+      description: Return filtered impacts
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_coverage"
+        - $ref: "#/components/parameters/header_customer_id"
+        - $ref: "#/components/parameters/header_contributors"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/impacts_search"
+        description: Parameters of filter
+      tags:
+        - Search
+      responses:
+        "200":
+          description: List of impact
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  impacts:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/impact_with_disruption"
+                  meta:
+                    type: object
+                    properties:
+                      pagination:
+                        $ref: "#/components/schemas/pagination_impacts_search"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_occurred"
+  /impacts/exports:
+    get:
+      description: Get exports status
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_customer_id"
+        - $ref: "#/components/parameters/exports_sort"
+      tags:
+        - Export
+      responses:
+        "200":
+          description: List of exports status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  exports:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/impacts_exports_status"
+    post:
+      description: Create archive file export
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_coverage"
+        - $ref: "#/components/parameters/header_customer_id"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/impacts_export_create"
+        description: Date range filters
+      tags:
+        - Export
+      responses:
+        "200":
+          description: Export already exist
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  export:
+                    $ref: "#/components/schemas/impacts_exports_status"
+        "201":
+          description: Export in progress
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  export:
+                    $ref: "#/components/schemas/impacts_exports_status"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_occurred"
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_occurred"
+  "/impacts/exports/{id}":
+    get:
+      description: Get the status of one export
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_customer_id"
+        - name: id
+          in: path
+          description: identifier
+          required: true
+          schema:
+            type: string
+            format: uuid
+      tags:
+        - Export
+      responses:
+        "200":
+          description: Export status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  export:
+                    $ref: "#/components/schemas/impacts_exports_status"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_404"
+  "/impacts/exports/{id}/download":
+    get:
+      description: Returns the archive file based ID
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_customer_id"
+        - name: id
+          in: path
+          description: identifier
+          required: true
+          schema:
+            type: string
+            format: uuid
+      tags:
+        - Export
+      responses:
+        "200":
+          description: Archive file
+        "404":
+          description: Not found
+          content:
+            application/csv:
+              schema:
+                $ref: "#/components/schemas/error_404"
+  /contributors:
+    post:
+      description: Create a contributor
+      parameters:
+        - $ref: "#/components/parameters/header_authorization"
+        - $ref: "#/components/parameters/header_customer_id"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/contributor_create"
+      tags:
+        - Contributor
+      responses:
+        "201":
+          description: Contributor created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/contributor"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_occurred"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_occurred"
+        "404":
+          description: Not Found (Customer not found)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_occurred"
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error_occurred"
+
+servers:
+  - url: http://127.0.0.1:5000/
+components:
+  parameters:
+    header_customer_id_create_client:
+      in: header
+      required: true
+      description: Client code. A client is owner of cause, channel, severity and tag. If this Client code doesn't exist, it will be created.
+      name: X-Customer-Id
+      schema:
+        type: string
+    header_customer_id:
+      in: header
+      required: true
+      description: Client code. A client is owner of cause, channel, severity and tag.
+      name: X-Customer-Id
+      schema:
+        type: string
+    header_coverage:
+      in: header
+      required: true
+      description: Coverage of navitia services
+      name: X-Coverage
+      schema:
+        type: string
+    header_authorization:
+      in: header
+      required: true
+      description: Token for navitia services
+      name: Authorization
+      schema:
+        type: string
+    header_contributors:
+      required: true
+      description: Contributor code
+      name: X-Contributors
+      in: header
+      schema:
+        type: string
+    start_page:
+      in: query
+      name: start_page
+      description: Index of the first element returned (start at 1)
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    items_per_page:
+      in: query
+      name: items_per_page
+      description: Number of items per page
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+        maximum: 1000
+        default: 20
+    publication_status:
+      in: query
+      name: publication_status
+      description: Filter by publication_status (example:publication_status[]=ongoing)
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+          enum:
+            - past
+            - ongoing
+            - coming
+        default:
+          - past
+          - ongoing
+          - coming
+    ends_after_date:
+      in: query
+      name: ends_after_date
+      description: "Start-date restriction for end_publication date (example:
+        2018-08-03T12:19:13Z)"
+      required: false
+      schema:
+        type: string
+    ends_before_date:
+      in: query
+      name: ends_before_date
+      description: "End-date restriction for end_publication date (example:
+        2018-08-03T12:19:13Z)"
+      required: false
+      schema:
+        type: string
+    current_time:
+      in: query
+      name: current_time
+      description: "Parameter for settings the current time, mostly for debugging purpose
+        (example: '2018-08-03T12:19:13Z')"
+      required: false
+      schema:
+        type: string
+        default: now
+    tag:
+      in: query
+      name: tag
+      description: Filter by tag (id of tag)
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+          format: uuid
+    uri:
+      in: query
+      name: uri
+      description: Filter by uri of ptobject
+      required: false
+      schema:
+        type: string
+    line_section:
+      in: query
+      name: line_section
+      description: If uri is a line id, filter also on related line_section(s)
+      required: false
+      schema:
+        type: boolean
+        default: false
+    status:
+      in: query
+      name: status
+      description: Filter by status
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+          enum:
+            - archived
+            - published
+            - draft
+        default:
+          - published
+          - draft
+    depth:
+      in: query
+      name: depth
+      description: With depth=2, you could retrieve the first page of impacts from the
+        disruption
+      required: false
+      schema:
+        type: integer
+        default: 1
+    exports_sort:
+      in: query
+      name: sort
+      description: Sort exports list
+      required: false
+      schema:
+        type: string
+        enum:
+          - created_at
+          - created_at:asc
+          - created_at:desc
+        default: created_at:desc
+  requestBodies:
+    cause_creation:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/cause_creation"
+      description: Cause that needs to be stored
+    property_creation:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/property_creation"
+      description: Property that needs to be stored
+    category_creation:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/category_creation"
+      description: Category that needs to be stored
+    disruption_creation:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/disruption_creation"
+      description: Disruption that needs to be stored
+    disruption_update:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/disruption_update"
+      description: Disruption that needs to be updated
+  schemas:
+    application_period_pattern_create:
+      type: object
+      required:
+        - start_date
+        - end_date
+        - weekly_pattern
+        - time_slots
+        - time_zone
+      properties:
+        end_date:
+          type: string
+          format: date
+        start_date:
+          type: string
+          format: date
+        weekly_pattern:
+          description: >
+            Days of week beginning at monday. If notification on given day is
+            active,
+
+            it should be marked with 1, otherwise 0
+          type: string
+          example: "0110000"
+        time_slots:
+          description: List with time slots whitin impact is active
+          type: array
+          uniqueItems: true
+          minItems: 1
+          items:
+            type: object
+            required:
+              - begin
+              - end
+            properties:
+              begin:
+                type: string
+                description: Start time (Format HH:MM)
+                example: "13:45"
+              end:
+                type: string
+                description: Start time (Format HH:MM)
+                example: "15:30"
+        time_zone:
+          type: string
+          example: Europe/Paris
+    application_period_pattern:
+      type: object
+      properties:
+        end_date:
+          type: string
+          format: date
+        start_date:
+          type: string
+          format: date
+        weekly_pattern:
+          description: >
+            Days of week beginning at monday. If notification on given day is
+            active,
+
+            it should be marked with 1, otherwise 0
+          type: string
+          example: "0110000"
+        time_slots:
+          description: List with time slots whitin impact is active
+          type: array
+          uniqueItems: true
+          minItems: 1
+          items:
+            type: object
+            properties:
+              begin:
+                type: string
+                description: Start time (Format HH:MM)
+                example: "13:45"
+              end:
+                type: string
+                description: Start time (Format HH:MM)
+                example: "15:30"
+        time_zone:
+          type: string
+          example: Europe/Paris
+    bad_id:
+      type: object
+      properties:
+        message:
+          type: string
+    category:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        self:
+          $ref: "#/components/schemas/href"
+        name:
+          type: string
+        created_at:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'
+          example: '2018-08-03T12:19:13Z'
+        updated_at:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'
+          example: '2018-08-03T12:19:13Z'
+    category_creation:
+      required:
+        - name
+      type: object
+      properties:
+        name:
+          type: string
+    cause:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        wordings:
+          type: array
+          items:
+            $ref: "#/components/schemas/wording"
+        category:
+          $ref: "#/components/schemas/category"
+        self:
+          $ref: "#/components/schemas/href"
+        created_at:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'
+          example: '2018-08-03T12:19:13Z'
+        updated_at:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'
+          example: '2018-08-03T12:19:13Z'
+    cause_creation:
+      type: object
+      required:
+        - wordings
+      properties:
+        wordings:
+          type: array
+          items:
+            $ref: "#/components/schemas/wording"
+        category:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+    channel:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        self:
+          $ref: "#/components/schemas/href"
+        name:
+          type: string
+        content_type:
+          type: string
+        max_size:
+          type: integer
+        required:
+          type: boolean
+          example: false
+        created_at:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'
+          example: '2018-08-03T12:19:13Z'
+        updated_at:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'
+          example: '2018-08-03T12:19:13Z'
+        types:
+          type: array
+          items:
+            type: string
+    channel_creation:
+      type: object
+      required:
+        - name
+        - max_size
+        - content_type
+        - types
+      properties:
+        name:
+          type: string
+        max_size:
+          type: integer
+        content_type:
+          type: string
+        required:
+          type: boolean
+          description: If true, this channel must contains text for an impact to be created
+            or edited.
+          example: false
+        types:
+          type: array
+          items:
+            type: string
+            enum:
+              - web
+              - sms
+              - email
+              - mobile
+              - notification
+              - twitter
+              - facebook
+              - title
+              - beacon
+    disruption:
+      type: object
+      properties:
+        cause:
+          $ref: "#/components/schemas/cause"
+        contributor:
+          type: string
+          description: Contributor code
+        author:
+          $ref: "#/components/schemas/author"
+        created_at:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'
+          example: '2018-08-03T12:19:13Z'
+        id:
+          type: string
+          format: uuid
+          description: Disruption ID
+        impacts:
+          type: object
+          description: Links to impacts of this disruption
+          properties:
+            pagination:
+              $ref: "#/components/schemas/pagination"
+        localization:
+          type: array
+          description: List of stop areas
+          items:
+            type: object
+            required:
+              - id
+              - type
+            properties:
+              id:
+                type: string
+                description: Stop area ID
+              label:
+                type: string
+                description: Label of stop area
+              name:
+                type: string
+                description: Label of stop area
+              type:
+                type: string
+                enum:
+                  - stop_area
+              codes:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      description: Type of code
+                    value:
+                      type: string
+                      description: Value of code
+              coord:
+                type: object
+                description: Coordinates - WGS84
+                properties:
+                  lat:
+                    type: number
+                    format: float
+                  lon:
+                    type: number
+                    format: float
+        note:
+          type: string
+          description: Service note of disruption
+        properties:
+          type: object
+          description: Associated properties
+        publication_period:
+          $ref: "#/components/schemas/period"
+        publication_status:
+          type: string
+          description: >
+            Status of publication.
+
+            past when publication end date is in past
+
+            ongoing when publication start date is in past and end date is in future
+
+            comming when publication start date is in future
+          enum:
+            - past
+            - ongoing
+            - coming
+        reference:
+          type: string
+          description: Publication reference label
+        self:
+          $ref: "#/components/schemas/href"
+        status:
+          type: string
+          enum:
+            - archived
+            - published
+            - draft
+        tags:
+          type: array
+          description: List of associated tags
+          items:
+            $ref: "#/components/schemas/tag"
+        type:
+          description: Type of the disruption
+          type: string
+          enum:
+            - unexpected
+        updated_at:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'
+          example: '2018-08-03T12:19:13Z'
+        version:
+          type: integer
+          description: Number of how many time this disruption has been changed
+    disruption_creation:
+      type: object
+      required:
+        - reference
+        - impacts
+        - contributor
+        - cause
+        - publication_period
+      properties:
+        reference:
+          type: string
+          maxLength: 250
+          description: Publication reference label
+        note:
+          type: string
+          description: Service note of disruption
+        contributor:
+          type: string
+          description: Contributor code (same as header X-Contributors)
+        author:
+          $ref: "#/components/schemas/author"
+        status:
+          type: string
+          enum:
+            - archived
+            - published
+            - draft
+        cause:
+          type: object
+          required:
+            - id
+          properties:
+            id:
+              type: string
+              format: uuid
+              description: Cause ID
+        tags:
+          description: List with Tag IDs
+          type: array
+          items:
+            type: object
+            required:
+              - id
+            properties:
+              id:
+                type: string
+                format: uuid
+                description: Tag ID
+        type:
+          description: Type of the disruption
+          type: string
+          enum:
+            - unexpected
+        localization:
+          description: List with IDs of stop areas
+          type: array
+          items:
+            type: object
+            required:
+              - id
+              - type
+            properties:
+              id:
+                type: string
+                description: Stop area ID
+              type:
+                type: string
+                enum:
+                  - stop_area
+          uniqueItems: true
+        publication_period:
+          $ref: "#/components/schemas/period_create"
+        impacts:
+          type: array
+          description: List of associated impacts
+          items:
+            $ref: "#/components/schemas/disruption_impact"
+          uniqueItems: true
+          minItems: 1
+        properties:
+          description: List with property IDs
+          type: array
+          items:
+            type: object
+            required:
+              - property_id
+              - value
+            properties:
+              property_id:
+                description: Property ID
+                type: string
+                format: uuid
+              value:
+                description: Value of a property
+                type: string
+                minLength: 1
+                maxLength: 250
+    disruption_impact:
+      type: object
+      required:
+        - severity
+        - objects
+        - application_periods
+      properties:
+        severity:
+          type: object
+          required:
+            - id
+          properties:
+            id:
+              description: Severity ID
+              type: string
+              format: uuid
+        application_periods:
+          type: array
+          description: Array with dates of application periods
+          items:
+            $ref: "#/components/schemas/period_create"
+        send_notifications:
+          type: boolean
+          default: false
+          description: If notification sms, mail, push on impact should be send
+        notification_date:
+          description: Date of notification (if not set and send_notification is true, it
+            will be the current UTC date)
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'
+          example: '2018-08-03T12:19:13Z'
+        messages:
+          type: array
+          description: List with messages by channel
+          items:
+            $ref: "#/components/schemas/disruption_impact_message"
+          uniqueItems: true
+        objects:
+          type: array
+          description: List of impacted PT objects
+          items:
+            oneOf:
+              - $ref: "#/components/schemas/impact_object"
+              - $ref: "#/components/schemas/impact_object_line_section"
+              - $ref: "#/components/schemas/impact_object_rail_section"
+          uniqueItems: true
+          minItems: 1
+    impact_object:
+      type: object
+      required:
+        - id
+        - type
+      properties:
+        id:
+          description: Impacted PT object ID in navitia
+          type: string
+          maxLength: 250
+        type:
+          description: Impacted PT object type in navitia
+          type: string
+          enum:
+            - network
+            - stop_area
+            - line
+            - route
+            - stop_point
+    impact_object_line_section:
+      type: object
+      required:
+        - type
+      properties:
+        id:
+          description: Impacted PT object ID in navitia
+          type: string
+          maxLength: 250
+        type:
+          description: Impacted PT object type in navitia
+          type: string
+          enum:
+            - line_section
+        line_section:
+          type: object
+          properties:
+            start_point:
+              type: object
+              properties:
+                id:
+                  type: string
+                type:
+                  type: string
+                  enum:
+                    - stop_area
+              required:
+                - id
+                - type
+            end_point:
+              type: object
+              properties:
+                id:
+                  type: string
+                type:
+                  type: string
+                  enum:
+                    - stop_area
+              required:
+                - id
+                - type
+            metas:
+              type: array
+              items:
+                $ref: "#/components/schemas/traffic_report_line_section_meta"
+            routes:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  type:
+                    type: string
+                    enum:
+                      - route
+                required:
+                  - id
+                  - type
+            line:
+              type: object
+              properties:
+                id:
+                  type: string
+                type:
+                  type: string
+                  enum:
+                    - line
+              required:
+                - id
+                - type
+          required:
+            - start_point
+            - end_point
+            - line
+    impact_object_rail_section:
+      type: object
+      required:
+        - type
+      properties:
+        id:
+          description: Impacted PT object ID in navitia
+          type: string
+          maxLength: 250
+        type:
+          description: Impacted PT object type in navitia (BETA version)
+          type: string
+          enum:
+            - rail_section
+        rail_section:
+          title: >
+            "routes" or "line" property are mandatory.
+          allOf:
+            - type: object
+              required:
+                - start_point
+                - end_point
+              properties:
+                start_point:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    type:
+                      type: string
+                      enum:
+                        - stop_area
+                  required:
+                    - id
+                    - type
+                end_point:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    type:
+                      type: string
+                      enum:
+                        - stop_area
+                  required:
+                    - id
+                    - type
+                blocked_stop_areas:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      order:
+                        type: integer
+                        minimum: 0
+                    required:
+                      - id
+                      - order
+                  minItems: 0
+            - anyOf:
+              - type: object
+                required:
+                  - routes
+                properties:
+                  routes:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        type:
+                          type: string
+                          enum:
+                            - route
+                      required:
+                        - id
+                        - type
+              - type: object
+                required:
+                  - line
+                properties:
+                  line:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      type:
+                        type: string
+                        enum:
+                          - line
+                    required:
+                      - id
+                      - type
+    disruption_impact_message:
+      type: object
+      required:
+        - text
+        - channel
+      properties:
+        text:
+          description: Message for given channel
+          type: string
+        channel:
+          description: Channel for given message
+          type: object
+          required:
+            - id
+          properties:
+            id:
+              description: Channel ID
+              type: string
+              format: uuid
+        meta:
+          type: array
+          description: Message meta for additional information
+          items:
+            $ref: "#/components/schemas/meta"
+    disruption_update:
+      type: object
+      required:
+        - reference
+        - impacts
+        - contributor
+        - cause
+        - publication_period
+      properties:
+        reference:
+          type: string
+          maxLength: 250
+          description: Publication reference label
+        note:
+          type: string
+          description: Service note of disruption
+        contributor:
+          type: string
+          description: Contributor code (same as header X-Contributors)
+        author:
+          $ref: "#/components/schemas/author"
+        status:
+          type: string
+          enum:
+            - archived
+            - published
+            - draft
+        cause:
+          type: object
+          required:
+            - id
+          properties:
+            id:
+              type: string
+              format: uuid
+              description: Cause ID
+        tags:
+          description: List with Tag IDs
+          type: array
+          items:
+            type: object
+            required:
+              - id
+            properties:
+              id:
+                type: string
+                format: uuid
+                description: Tag ID
+        type:
+          description: Type of the disruption
+          type: string
+          enum:
+            - unexpected
+        localization:
+          description: List with IDs of stop areas
+          type: array
+          items:
+            type: object
+            required:
+              - id
+              - type
+            properties:
+              id:
+                type: string
+                description: Stop area ID
+              type:
+                type: string
+                enum:
+                  - stop_area
+          uniqueItems: true
+        publication_period:
+          $ref: "#/components/schemas/period_create"
+        impacts:
+          type: array
+          description: List of associated impacts
+          items:
+            $ref: "#/components/schemas/disruption_update_impact"
+          uniqueItems: true
+          minItems: 1
+        properties:
+          description: List with property IDs
+          type: array
+          items:
+            type: object
+            required:
+              - property_id
+              - value
+            properties:
+              property_id:
+                description: Property ID
+                type: string
+                format: uuid
+              value:
+                description: Value of a property
+                type: string
+                minLength: 1
+                maxLength: 250
+    disruption_update_impact:
+      type: object
+      required:
+        - severity
+        - objects
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Impact ID
+        severity:
+          type: object
+          required:
+            - id
+          properties:
+            id:
+              description: Severity ID
+              type: string
+              format: uuid
+        application_periods:
+          type: array
+          description: Array with dates of application periods
+          items:
+            $ref: "#/components/schemas/period_create"
+        send_notifications:
+          type: boolean
+          default: false
+          description: If notification sms, mail, push on impact should be send
+        notification_date:
+          description: Date of notification (if not set and send_notification is true, it
+            will be the current UTC date)
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'
+          example: '2018-08-03T12:19:13Z'
+        messages:
+          type: array
+          description: List with messages by channel
+          items:
+            $ref: "#/components/schemas/disruption_impact_message"
+          uniqueItems: true
+        objects:
+          type: array
+          description: List of impacted PT objects
+          items:
+            oneOf:
+              - $ref: "#/components/schemas/impact_object"
+              - $ref: "#/components/schemas/impact_object_line_section"
+              - $ref: "#/components/schemas/impact_object_rail_section"
+          uniqueItems: true
+          minItems: 1
+    disruption_in_impact:
+      type: object
+      properties:
+        cause:
+          $ref: "#/components/schemas/cause"
+        id:
+          type: string
+          format: uuid
+          description: Disruption ID
+        self:
+          $ref: "#/components/schemas/href"
+    disruptions_search:
+      type: object
+      properties:
+        start_page:
+          description: Index of the first element returned (start at 1)
+          type: integer
+          default: 1
+          minimum: 1
+          example: 1
+        items_per_page:
+          description: Number of items per page
+          type: integer
+          default: 20
+          minimum: 0
+          maximum: 1000
+          example: 20
+        application_status:
+          description: Filter by application_status (on impact)
+          default:
+            - past
+            - ongoing
+            - coming
+          type: array
+          items:
+            type: string
+            enum:
+              - past
+              - ongoing
+              - coming
+        publication_status:
+          description: Filter by publication_status (on disruption)
+          default:
+            - past
+            - ongoing
+            - coming
+          type: array
+          items:
+            type: string
+            enum:
+              - past
+              - ongoing
+              - coming
+        ends_after_date:
+          description: Start-date restriction for end_publication date
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'
+          example: '2018-08-03T12:19:13Z'
+        ends_before_date:
+          description: End-date restriction for end_publication date
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'
+          example: '2018-08-03T12:19:13Z'
+        application_period:
+          required:
+            - begin
+            - end
+          type: object
+          description: Filter on impact application_period
+          properties:
+            begin:
+              type: string
+              pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'
+              example: '2018-08-03T12:19:13Z'
+            end:
+              type: string
+              pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'
+              example: '2018-08-03T14:19:13Z'
+        current_time:
+          description: Parameter for settings the current time, mostly for debugging purpose
+          default: now
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'
+          example: '2018-08-03T12:19:13Z'
+        tag:
+          description: Filter by tag (id of tag)
+          type: array
+          items:
+            type: string
+            format: uuid
+        with_disruption_types:
+          description: Filter by type (include)
+          type: array
+          items:
+            type: string
+            enum:
+              - unexpected
+        without_disruption_types:
+          description: Filter by type (exclude)
+          type: array
+          items:
+            type: string
+            enum:
+              - unexpected
+        uri:
+          description: Filter by uri of ptobject
+          type: string
+        line_section:
+          description: If uri is a line id, filter also on related line_section(s)
+          type: boolean
+          default: false
+        rail_section:
+          description: If uri is a line id, filter also on related rail_section(s)
+          type: boolean
+          default: false
+        status:
+          description: Filter by status
+          default:
+            - published
+            - draft
+          type: array
+          items:
+            type: string
+            enum:
+              - archived
+              - published
+              - draft
+        depth:
+          description: With depth=2, you could retrieve the first page of impacts from the
+            disruption
+          type: integer
+          default: 1
+        cause_category_id:
+          description: Filter by category id
+          type: string
+          format: uuid
+        ptObjectFilter:
+          $ref: "#/components/schemas/pt_object_filter"
+    error_404:
+      type: object
+      properties:
+        status:
+          type: number
+        message:
+          type: string
+    error_occurred:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            message:
+              type: string
+    href:
+      type: object
+      properties:
+        href:
+          type: string
+    impact:
+      type: object
+      properties:
+        application_period_patterns:
+          type: array
+          items:
+            $ref: "#/components/schemas/application_period_pattern"
+        application_periods:
+          type: array
+          items:
+            $ref: "#/components/schemas/period"
+        created_at:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'
+          example: '2018-08-03T12:19:13Z'
+        disruption:
+          $ref: "#/components/schemas/href"
+        id:
+          description: Impact ID
+          type: string
+          format: uuid
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/impact_message"
+        notification_date:
+          description: Date of notification (if not set and send_notification is true, it
+            will be the current UTC date)
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'
+          example: '2018-08-03T12:19:13Z'
+        objects:
+          type: array
+          description: List with impacted PT objects
+          items:
+            type: object
+            properties:
+              id:
+                description: Impacted PT object ID in navitia
+                type: string
+              name:
+                description: Name of impacted PT object in navitia
+                type: string
+              type:
+                description: Impacted PT object type in navitia
+                type: string
+        self:
+          $ref: "#/components/schemas/href"
+        send_notifications:
+          description: If notification should be send or not
+          type: boolean
+          default: false
+        severity:
+          $ref: "#/components/schemas/severity"
+        updated_at:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'
+          example: '2018-08-03T12:19:13Z'
+    impact_creation:
+      type: object
+      required:
+        - severity
+        - objects
+      properties:
+        application_period_patterns:
+          type: array
+          description: Either application_period_patterns or application_periods could be
+            used
+          items:
+            $ref: "#/components/schemas/application_period_pattern_create"
+        application_periods:
+          type: array
+          description: Either application_period_patterns or application_periods could be
+            used
+          items:
+            $ref: "#/components/schemas/period_create"
+        severity:
+          type: object
+          properties:
+            id:
+              description: Severity ID
+              type: string
+              format: uuid
+        messages:
+          description: List with messages by Channel
+          type: array
+          items:
+            $ref: "#/components/schemas/disruption_impact_message"
+        objects:
+          type: array
+          description: List with impacted PT objects
+          items:
+            oneOf:
+              - $ref: "#/components/schemas/impact_object"
+              - $ref: "#/components/schemas/impact_object_line_section"
+              - $ref: "#/components/schemas/impact_object_rail_section"
+        send_notifications:
+          description: If notification should be send or not
+          type: boolean
+          default: false
+        notification_date:
+          description: Date of notification (if not set and send_notification is true, it
+            will be the current UTC date)
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'
+          example: '2018-08-03T12:19:13Z'
+    impact_message:
+      type: object
+      properties:
+        created_at:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'
+          example: '2018-08-03T12:19:13Z'
+        updated_at:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'
+          example: '2018-08-03T12:19:13Z'
+        text:
+          description: Message for given channel
+          type: string
+        channel:
+          $ref: "#/components/schemas/impact_message_channel"
+        meta:
+          type: array
+          description: Message meta for additional information
+          items:
+            $ref: "#/components/schemas/meta"
+    impact_message_channel:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        content_type:
+          type: string
+        max_size:
+          type: integer
+        created_at:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'
+          example: '2018-08-03T12:19:13Z'
+        updated_at:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'
+          example: '2018-08-03T12:19:13Z'
+        types:
+          type: array
+          items:
+            type: string
+    impact_with_disruption:
+      type: object
+      properties:
+        application_period_patterns:
+          type: array
+          items:
+            $ref: "#/components/schemas/application_period_pattern"
+        application_periods:
+          type: array
+          items:
+            $ref: "#/components/schemas/period"
+        created_at:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'
+          example: '2018-08-03T12:19:13Z'
+        disruption:
+          $ref: "#/components/schemas/disruption_in_impact"
+        id:
+          description: Impact ID
+          type: string
+          format: uuid
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/impact_message"
+        objects:
+          type: array
+          description: List with impacted PT objects
+          items:
+            type: object
+            properties:
+              id:
+                description: Impacted PT object ID in navitia
+                type: string
+              name:
+                description: Name of impacted PT object in navitia
+                type: string
+              type:
+                description: Impacted PT object type in navitia
+                type: string
+        self:
+          $ref: "#/components/schemas/href"
+        send_notifications:
+          description: If notification should be send or not
+          type: boolean
+          default: false
+        notification_date:
+          description: Date of notification (if not set and send_notification is true, it
+            will be the current UTC date)
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'
+          example: '2018-08-03T12:19:13Z'
+        severity:
+          $ref: "#/components/schemas/severity"
+        updated_at:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'
+          example: '2018-08-03T12:19:13Z'
+    impacts_export_create:
+      type: object
+      required:
+        - start_date
+        - end_date
+      properties:
+        start_date:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'
+          example: 2019-01-01T00:00:00Z
+        end_date:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'
+          example: 2019-03-01T23:59:59Z
+        time_zone:
+          type: string
+          default: UTC
+          example: Europe/Paris
+    impacts_exports_status:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum:
+            - waiting
+            - handling
+            - error
+            - done
+        process_start_date:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'
+          example: 2019-03-20T16:00:00Z
+        start_date:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'
+          example: 2019-01-01T00:00:00Z
+        end_date:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'
+          example: 2019-03-01T23:59:59Z
+        time_zone:
+          type: string
+          example: Europe/Paris
+        created_at:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'
+          example: '2018-08-03T12:19:13Z'
+        updated_at:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'
+          example: '2018-08-03T12:19:13Z'
+    impacts_search:
+      type: object
+      properties:
+        start_page:
+          description: Index of the first element returned (start at 1)
+          type: integer
+          default: 1
+          minimum: 1
+          example: 1
+        items_per_page:
+          description: Number of items per page
+          type: integer
+          default: 20
+          minimum: 0
+          maximum: 1000
+          example: 20
+        application_status:
+          description: Filter by application_status (on impact)
+          default:
+            - past
+            - ongoing
+            - coming
+          type: array
+          items:
+            type: string
+            enum:
+              - past
+              - ongoing
+              - coming
+        application_period:
+          required:
+            - begin
+            - end
+          type: object
+          description: Filter on impact application_period
+          properties:
+            begin:
+              type: string
+              pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'
+              example: '2018-08-03T12:19:13Z'
+            end:
+              type: string
+              pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'
+              example: '2018-08-03T14:19:13Z'
+        current_time:
+          description: Parameter for settings the current time, mostly for debugging purpose
+          default: now
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'
+          example: '2018-08-03T12:19:13Z'
+        cause_category_id:
+          description: Filter by category id
+          type: string
+          format: uuid
+        ptObjectFilter:
+          $ref: "#/components/schemas/pt_object_filter"
+        with_disruption_types:
+          description: Filter by type (include)
+          type: array
+          items:
+            type: string
+            enum:
+              - unexpected
+        without_disruption_types:
+          description: Filter by type (exclude)
+          type: array
+          items:
+            type: string
+            enum:
+              - unexpected
+        sort:
+          type: object
+          properties:
+            by:
+              description: order column
+              type: string
+              enum:
+                - impactUpdatedAt
+                - impactApplicationEndDate
+                - severityPriority
+            order:
+              description: order type
+              default: asc
+              type: string
+              enum:
+                - desc
+                - asc
+    meta:
+      type: object
+      required:
+        - key
+        - value
+      properties:
+        key:
+          type: string
+          example: subject
+        value:
+          type: string
+          example: Mail subject
+    pagination:
+      type: object
+      properties:
+        start_page:
+          type: integer
+        items_per_page:
+          type: integer
+        total_result:
+          type: integer
+        prev:
+          $ref: "#/components/schemas/href"
+        next:
+          $ref: "#/components/schemas/href"
+        first:
+          $ref: "#/components/schemas/href"
+        last:
+          $ref: "#/components/schemas/href"
+    pagination_impacts_search:
+      type: object
+      properties:
+        start_page:
+          type: integer
+        items_per_page:
+          type: integer
+        total_result:
+          type: integer
+        items_on_page:
+          type: integer
+    period:
+      type: object
+      properties:
+        begin:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'
+          example: '2018-08-03T12:19:13Z'
+        end:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'
+          example: '2018-08-03T14:19:13Z'
+    period_create:
+      type: object
+      required:
+        - begin
+        - end
+      properties:
+        begin:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'
+          example: '2018-08-03T12:19:13Z'
+        end:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'
+          example: '2018-08-03T14:19:13Z'
+    property:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        self:
+          $ref: "#/components/schemas/href"
+        key:
+          type: string
+        type:
+          type: string
+        created_at:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'
+          example: '2018-08-03T12:19:13Z'
+        updated_at:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'
+          example: '2018-08-03T12:19:13Z'
+    property_creation:
+      type: object
+      required:
+        - key
+        - type
+      properties:
+        key:
+          type: string
+        type:
+          type: string
+    pt_object_filter:
+      type: object
+      description: Filter by ptObject list. If set, return only disruptions who has all
+        impacts ptObject in this list
+      properties:
+        networks:
+          type: array
+          items:
+            description: Id of network object
+            type: string
+        lines:
+          type: array
+          items:
+            description: Id of line object
+            type: string
+        routes:
+          type: array
+          items:
+            description: Id of route object
+            type: string
+        stop_points:
+          type: array
+          items:
+            description: Id of stop_point object
+            type: string
+        stop_areas:
+          type: array
+          items:
+            description: Id of stop_area object
+            type: string
+    severity:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        self:
+          $ref: "#/components/schemas/href"
+        color:
+          type: string
+        created_at:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'
+          example: '2018-08-03T12:19:13Z'
+        effect:
+          type: string
+          enum:
+            - no_service
+            - reduced_service
+            - significant_delays
+            - detour
+            - additional_service
+            - modified_service
+            - other_effect
+            - unknown_effect
+            - stop_moved
+            - None
+        priority:
+          type: integer
+        updated_at:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'
+          example: '2018-08-03T12:19:13Z'
+        wording:
+          type: string
+        wordings:
+          type: array
+          items:
+            $ref: "#/components/schemas/wording"
+    severity_creation:
+      type: object
+      required:
+        - wordings
+      properties:
+        color:
+          type: string
+        effect:
+          type: string
+          enum:
+            - no_service
+            - reduced_service
+            - significant_delays
+            - detour
+            - additional_service
+            - modified_service
+            - other_effect
+            - unknown_effect
+            - stop_moved
+            - None
+        priority:
+          type: integer
+          default: 0
+        wordings:
+          type: array
+          items:
+            $ref: "#/components/schemas/wording"
+    tag:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        self:
+          $ref: "#/components/schemas/href"
+        name:
+          type: string
+        created_at:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'
+          example: '2018-08-03T12:19:13Z'
+        updated_at:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'
+          example: '2018-08-03T12:19:13Z'
+    tag_creation:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+    traffic_report:
+      type: array
+      items:
+        $ref: "#/components/schemas/traffic_report_for_network"
+    traffic_report_disruption:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Impact ID
+        disruption_id:
+          type: string
+          format: uuid
+          description: Impact ID
+        status:
+          type: string
+          enum:
+            - active
+          description: If impact is active or not
+        cause:
+          type: string
+          description: Label of related cause
+        severity:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+              description: Severity ID
+            name:
+              type: string
+              description: Severity name
+            effect:
+              type: string
+              description: One of allowed severity effect
+              enum:
+                - no_service
+                - reduced_service
+                - significant_delays
+                - detour
+                - additional_service
+                - modified_service
+                - other_effect
+                - unknown_effect
+                - stop_moved
+                - None
+            color:
+              type: string
+              description: Hexadecimal color code
+            priority:
+              type: integer
+        application_periods:
+          type: array
+          items:
+            $ref: "#/components/schemas/period"
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/traffic_report_message"
+    traffic_report_for_network:
+      type: object
+      required:
+        - network
+      properties:
+        network:
+          type: object
+          description: Impacted Network
+          properties:
+            name:
+              description: Network name
+              type: string
+            id:
+              description: Network identifier in Navitia
+              type: string
+        line_sections:
+          description: Impacted line sections
+          type: array
+          items:
+            $ref: "#/components/schemas/traffic_report_line_section"
+        lines:
+          description: Impacted lines
+          type: array
+          items:
+            $ref: "#/components/schemas/traffic_report_line"
+        stop_areas:
+          type: array
+          description: Impacted stop areas
+          items:
+            $ref: "#/components/schemas/traffic_report_stop"
+        stop_points:
+          type: array
+          description: Impacted stop points
+          items:
+            $ref: "#/components/schemas/traffic_report_stop"
+    traffic_report_line_section:
+      type: object
+      properties:
+        line_section:
+          type: object
+          properties:
+            start_point:
+              type: object
+              properties:
+                type:
+                  type: string
+                id:
+                  type: string
+            end_point:
+              type: object
+              properties:
+                type:
+                  type: string
+                id:
+                  type: string
+            metas:
+              type: array
+              items:
+                $ref: "#/components/schemas/traffic_report_line_section_meta"
+            routes:
+              type: array
+              items:
+                $ref: "#/components/schemas/traffic_report_line_section_route"
+            line:
+              type: object
+              properties:
+                id:
+                  type: string
+                code:
+                  type: string
+                type:
+                  type: string
+                name:
+                  type: string
+        type:
+          type: string
+        id:
+          type: string
+          format: uuid
+        links:
+          type: array
+          items:
+            $ref: "#/components/schemas/traffic_report_link"
+    traffic_report_line:
+      type: object
+      properties:
+        code:
+          description: Line code
+          type: string
+        name:
+          description: Line name
+          type: string
+        id:
+          description: Line identifier in Navitia
+          type: string
+        links:
+          type: array
+          items:
+            $ref: "#/components/schemas/traffic_report_link"
+    traffic_report_line_section_meta:
+      type: object
+      properties:
+        value:
+          type: string
+        key:
+          type: string
+    traffic_report_line_section_route:
+      type: object
+      properties:
+        type:
+          type: string
+        id:
+          type: string
+    traffic_report_link:
+      type: object
+      properties:
+        internal:
+          type: boolean
+        template:
+          type: boolean
+        type:
+          type: string
+        id:
+          type: string
+          format: uuid
+        rel:
+          type: string
+    traffic_report_message:
+      type: object
+      properties:
+        text:
+          type: string
+        channel:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            name:
+              type: string
+            content_type:
+              type: string
+            max_size:
+              type: integer
+            types:
+              type: array
+              items:
+                type: string
+    traffic_report_stop:
+      type: object
+      properties:
+        name:
+          type: string
+        id:
+          type: string
+        links:
+          type: array
+          items:
+            $ref: "#/components/schemas/traffic_report_link"
+    wording:
+      type: object
+      required:
+        - key
+        - value
+      properties:
+        key:
+          type: string
+        value:
+          type: string
+    disruption_history:
+      type: object
+      properties:
+        cause:
+          $ref: "#/components/schemas/cause"
+        contributor:
+          type: string
+          description: Contributor code
+        author:
+          $ref: "#/components/schemas/author"
+        created_at:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'
+          example: '2018-08-03T12:19:13Z'
+        id:
+          type: string
+          format: uuid
+          description: Disruption ID
+        impacts:
+          type: object
+          description: Links to impacts of this disruption
+          properties:
+            impacts:
+              type: array
+              items:
+                $ref: "#/components/schemas/impact"
+            pagination:
+              $ref: "#/components/schemas/pagination"
+        localization:
+          type: array
+          description: List of stop areas
+          items:
+            type: object
+            required:
+              - id
+              - type
+            properties:
+              id:
+                type: string
+                description: Stop area ID
+              label:
+                type: string
+                description: Label of stop area
+              name:
+                type: string
+                description: Label of stop area
+              type:
+                type: string
+                enum:
+                  - stop_area
+              codes:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      description: Type of code
+                    value:
+                      type: string
+                      description: Value of code
+              coord:
+                type: object
+                description: Coordinates - WGS84
+                properties:
+                  lat:
+                    type: number
+                    format: float
+                  lon:
+                    type: number
+                    format: float
+        note:
+          type: string
+          description: Service note of disruption
+        properties:
+          type: object
+          description: Associated properties
+        publication_period:
+          $ref: "#/components/schemas/period"
+        publication_status:
+          type: string
+          description: >
+            Status of publication.
+
+            past when publication end date is in past
+
+            ongoing when publication start date is in past and end date is in future
+
+            comming when publication start date is in future
+          enum:
+            - past
+            - ongoing
+            - coming
+        reference:
+          type: string
+          description: Publication reference label
+        self:
+          $ref: "#/components/schemas/href"
+        status:
+          type: string
+          enum:
+            - archived
+            - published
+            - draft
+        tags:
+          type: array
+          description: List of associated tags
+          items:
+            $ref: "#/components/schemas/tag"
+        type:
+          type: string
+          enum:
+            - unexpected
+        updated_at:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'
+          example: '2018-08-03T12:19:13Z'
+        version:
+          type: integer
+          description: Number of how many time this disruption has been changed
+    author:
+      type: string
+      description: ID of disruption creator or editor
+    contributor_create:
+      type: object
+      required:
+        - code
+      properties:
+        code:
+          type: string
+          minLength: 1
+          maxLength: 250
+          description: Code of the new contributor
+    contributor:
+      type: object
+      properties:
+        code:
+          type: string
+          minLength: 1
+          maxLength: 250
+          description: Code of the contributor
